@@ -8,4 +8,14 @@ const register = async (req, res) => {
     email: user.email,
   });
 };
-export { register };
+
+const login = async (req, res) => {
+  const { user, token } = await authService.login(req.body);
+  res.cookie("token", token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "strict",
+  });
+  APIResponse.ok(res, "Login successful", { ...user, token });
+};
+export { register, login };

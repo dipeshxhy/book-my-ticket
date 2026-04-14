@@ -14,6 +14,9 @@ class APIError extends Error {
   static conflict(message) {
     return new APIError(message, 409);
   }
+  static unauthorized(message) {
+    return new APIError(message, 401);
+  }
   static internal(message) {
     return new APIError(message, 500);
   }

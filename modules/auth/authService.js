@@ -1,6 +1,10 @@
 import bcrypt from "bcryptjs";
 import APIError from "../../common/utils/apiError.js";
 import { createUser, findUserByEmail } from "./authModel.js";
+import {
+  comparePassword,
+  createJWTToken,
+} from "../../common/utils/jwtUtils.js";
 
 const register = async ({ name, email, password }) => {
   // check if user already exists
@@ -14,4 +18,24 @@ const register = async ({ name, email, password }) => {
   return user;
 };
 
-export { register };
+//login
+const login = async ({ email, password }) => {
+  const user = await findUserByEmail(email);
+  if (!user) {
+    throw APIError.unauthorized("Invalid email or password");
+  }
+  const isMatch = await comparePassword(password, user.password);
+  if (!isMatch) {
+    throw APIError.unauthorized("Invalid email or password");
+  }
+  // create JWT token and return
+  const token = createJWTToken({ id: user.id, email: user.email });
+
+  const userObj = {
+    id: user.id,
+    name: user.name,
+    email: user.email,
+  };
+  return { user: userObj, token };
+};
+export { register, login };
