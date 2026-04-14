@@ -7,13 +7,13 @@ export const pool = new pg.Pool({
   password: "postgres",
   database: "book_my_show",
   max: 20,
-  connectionTimeoutMillis: 0,
-  idleTimeoutMillis: 0,
+  connectionTimeoutMillis: 5000,
+  idleTimeoutMillis: 30000,
 });
 
 export const connectDb = async () => {
   try {
-    await pool.connect();
+    await pool.query("SELECT 1");
     console.log("Connected to the database");
   } catch (err) {
     console.log("Error connecting to the database", err);
