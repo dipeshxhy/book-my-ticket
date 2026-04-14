@@ -1,6 +1,6 @@
 import bcrypt from "bcryptjs";
 import APIError from "../../common/utils/apiError.js";
-import { createUser, findUserByEmail } from "./authModel.js";
+import { createUser, findUserByEmail, findUserById } from "./authModel.js";
 import {
   comparePassword,
   createJWTToken,
@@ -38,4 +38,16 @@ const login = async ({ email, password }) => {
   };
   return { user: userObj, token };
 };
-export { register, login };
+
+const getMe = async (userId) => {
+  const user = await findUserById(userId);
+  if (!user) {
+    throw APIError.notFound("User not found");
+  }
+  return {
+    id: user.id,
+    name: user.name,
+    email: user.email,
+  };
+};
+export { register, login, getMe };

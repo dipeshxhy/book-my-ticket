@@ -12,4 +12,10 @@ const findUserByEmail = async (email) => {
   return result.rows[0];
 };
 
-export { createUser, findUserByEmail };
+const findUserById = async (id) => {
+  const sql = "SELECT * FROM users WHERE id = $1";
+  const result = await pool.query(sql, [id]);
+  return result.rows[0];
+};
+
+export { createUser, findUserByEmail, findUserById };

@@ -18,4 +18,8 @@ const login = async (req, res) => {
   });
   APIResponse.ok(res, "Login successful", { ...user, token });
 };
-export { register, login };
+const getMe = async (req, res) => {
+  const user = await authService.getMe(req.user.id);
+  APIResponse.ok(res, "User details fetched successfully", user);
+};
+export { register, login, getMe };
