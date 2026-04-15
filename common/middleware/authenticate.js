@@ -11,7 +11,6 @@ const authenticated = async (req, res, next) => {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
     const user = await findUserById(decoded.id);
-    console.log("user from DB:", user);
     if (!user) {
       throw APIError.unauthorized("Invalid authentication token");
     }

@@ -81,7 +81,7 @@ const deleteUser = async (id) => {
   if (!user) {
     throw APIError.notFound("User not found");
   }
-  // delete user logic here (not implemented in model yet)
+
   return await removeUser(id);
 };
 export { register, login, getMe, getAllUsers, getUserById, deleteUser };

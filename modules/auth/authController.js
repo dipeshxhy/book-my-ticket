@@ -1,5 +1,22 @@
 import APIResponse from "../../common/utils/apiResponse.js";
 import * as authService from "./authService.js";
+
+const isProduction = process.env.NODE_ENV === "production";
+const authCookieOptions = {
+  httpOnly: true,
+  path: "/",
+  sameSite: isProduction ? "none" : "strict",
+  secure: isProduction,
+  maxAge: 7 * 24 * 60 * 60 * 1000,
+};
+
+const clearAuthCookieOptions = {
+  httpOnly: true,
+  path: "/",
+  sameSite: isProduction ? "none" : "strict",
+  secure: isProduction,
+};
+
 const register = async (req, res, next) => {
   const user = await authService.register(req.body);
   APIResponse.created(res, "User registered successfully", {
@@ -12,22 +29,14 @@ const register = async (req, res, next) => {
 const login = async (req, res) => {
   const { user, token } = await authService.login(req.body);
 
-  res.cookie("token", token, {
-    httpOnly: true,
-    path: "/",
-    sameSite: "strict",
-  });
+  res.cookie("token", token, authCookieOptions);
   APIResponse.ok(res, "Login successful", {
     ...user,
     token,
   });
 };
 const logout = async (req, res) => {
-  res.clearCookie("token", {
-    httpOnly: true,
-    path: "/",
-    sameSite: "strict",
-  });
+  res.clearCookie("token", clearAuthCookieOptions);
   APIResponse.ok(res, "Logout successful");
 };
 const getMe = async (req, res) => {

@@ -17,11 +17,21 @@ import cookieParser from "cookie-parser";
 import { authenticated, authorized } from "./common/middleware/authenticate.js";
 
 const app = express();
+const allowedOrigins = (process.env.FRONTEND_ORIGIN || "")
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
+const corsOptions = {
+  origin: allowedOrigins.length > 0 ? allowedOrigins : true,
+  credentials: true,
+};
+
 app.use(express.static(__dirname + "/public"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
-app.use(cors());
+app.use(cors(corsOptions));
 
 app.use("/auth", authRoutes);
 app.use("/admin", authenticated, authorized("admin"), adminRoutes);
