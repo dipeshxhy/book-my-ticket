@@ -1,5 +1,8 @@
 # Book My Ticket
 
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-Open%20App-22c55e?style=for-the-badge)](https://book-my-ticket-xzgv.onrender.com/)
+
+
 A Node.js + Express + PostgreSQL seat booking application with:
 
 - User registration and login
