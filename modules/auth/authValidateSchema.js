@@ -7,8 +7,8 @@ const registerUserSchema = z.object({
     .nonempty("First name is required"),
   last_name: z.string().optional(),
   email: z
-    .string() // ✅ REQUIRED
-    .nonempty("Email is required") // ✅ REQUIRED
+    .string()
+    .nonempty("Email is required")
     .email("Invalid email address"),
 
   password: z
