@@ -17,6 +17,9 @@ class APIError extends Error {
   static unauthorized(message) {
     return new APIError(message, 401);
   }
+  static forbidden(message) {
+    return new APIError(message, 403);
+  }
   static internal(message) {
     return new APIError(message, 500);
   }

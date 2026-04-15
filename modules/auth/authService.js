@@ -1,12 +1,18 @@
 import bcrypt from "bcryptjs";
 import APIError from "../../common/utils/apiError.js";
-import { createUser, findUserByEmail, findUserById } from "./authModel.js";
+import {
+  createUser,
+  findAllUsers,
+  findUserByEmail,
+  findUserById,
+  removeUser,
+} from "./authModel.js";
 import {
   comparePassword,
   createJWTToken,
 } from "../../common/utils/jwtUtils.js";
 
-const register = async ({ name, email, password }) => {
+const register = async ({ first_name, last_name, email, password }) => {
   // check if user already exists
   const existingUser = await findUserByEmail(email);
   if (existingUser) {
@@ -14,7 +20,7 @@ const register = async ({ name, email, password }) => {
   }
   // create user
   const hashedPassword = await bcrypt.hash(password, 10);
-  const user = await createUser(name, email, hashedPassword);
+  const user = await createUser(first_name, last_name, email, hashedPassword);
   return user;
 };
 
@@ -33,7 +39,7 @@ const login = async ({ email, password }) => {
 
   const userObj = {
     id: user.id,
-    name: user.name,
+    name: user.first_name + " " + user.last_name,
     email: user.email,
   };
   return { user: userObj, token };
@@ -46,8 +52,36 @@ const getMe = async (userId) => {
   }
   return {
     id: user.id,
-    name: user.name,
+    name: user.first_name + " " + user.last_name,
     email: user.email,
   };
 };
-export { register, login, getMe };
+
+//admin services
+
+const getAllUsers = async () => {
+  const users = await findAllUsers();
+  return users;
+};
+const getUserById = async (id) => {
+  const user = await findUserById(id);
+  if (!user) {
+    throw APIError.notFound("User not found");
+  }
+  return {
+    id: user.id,
+    first_name: user.first_name,
+    last_name: user.last_name,
+    email: user.email,
+  };
+};
+
+const deleteUser = async (id) => {
+  const user = await findUserById(id);
+  if (!user) {
+    throw APIError.notFound("User not found");
+  }
+  // delete user logic here (not implemented in model yet)
+  return await removeUser(id);
+};
+export { register, login, getMe, getAllUsers, getUserById, deleteUser };

@@ -1,9 +1,14 @@
 import { pool } from "../../db/index.js";
 
-const createUser = async (name, email, password) => {
+const createUser = async (first_name, last_name, email, password) => {
   const sql =
-    "INSERT INTO users (name, email, password) VALUES ($1, $2, $3) RETURNING *";
-  const result = await pool.query(sql, [name, email, password]);
+    "INSERT INTO users (first_name, last_name, email, password) VALUES ($1, $2, $3, $4) RETURNING *";
+  const result = await pool.query(sql, [
+    first_name,
+    last_name,
+    email,
+    password,
+  ]);
   return result.rows[0];
 };
 const findUserByEmail = async (email) => {
@@ -18,4 +23,15 @@ const findUserById = async (id) => {
   return result.rows[0];
 };
 
-export { createUser, findUserByEmail, findUserById };
+//admin
+const findAllUsers = async () => {
+  const sql = "SELECT id, first_name, last_name, email FROM users";
+  const result = await pool.query(sql);
+  return result.rows;
+};
+const removeUser = async (id) => {
+  const sql = "DELETE FROM users WHERE id = $1 RETURNING *";
+  const result = await pool.query(sql, [id]);
+  return result.rows[0];
+};
+export { createUser, findUserByEmail, findUserById, findAllUsers, removeUser };

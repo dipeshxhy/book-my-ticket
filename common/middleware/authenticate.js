@@ -5,20 +5,33 @@ const authenticated = async (req, res, next) => {
   const token = req.cookies.token;
 
   if (!token) {
-    throw APIError.unauthorized("No token provided, authorization denied");
+    throw APIError.unauthorized("Authentication token missing");
   }
   try {
-    // Verify token and attach user to request
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
     const user = await findUserById(decoded.id);
+    console.log("user from DB:", user);
     if (!user) {
-      throw APIError.unauthorized("User not found");
+      throw APIError.unauthorized("Invalid authentication token");
     }
-    req.user = decoded;
+
+    req.user = user; // better to pass full user
     next();
   } catch (err) {
-    throw APIError.unauthorized("Invalid token or token expired");
+    throw APIError.unauthorized("Invalid authentication token");
   }
 };
 
-export { authenticated };
+const authorized = (...allowedRoles) => {
+  return (req, res, next) => {
+    if (!allowedRoles.includes(req.user.role)) {
+      throw APIError.forbidden(
+        "You do not have permission to access this resource",
+      );
+    }
+    next();
+  };
+};
+
+export { authenticated, authorized };

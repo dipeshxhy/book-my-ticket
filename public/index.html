@@ -1,0 +1,269 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Stellar Seat Booking</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&display=swap");
+      body {
+        font-family: "Outfit", sans-serif;
+        background-color: #0f172a;
+        color: #f8fafc;
+      }
+    </style>
+  </head>
+  <body
+    class="min-h-screen flex items-center justify-center p-6 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900"
+  >
+    <div
+      class="max-w-7xl w-full bg-slate-800/80 backdrop-blur-xl rounded-3xl shadow-2xl p-10 border border-slate-700/50"
+    >
+      <div class="flex justify-end mb-6">
+        <div
+          id="authBox"
+          class="text-sm text-slate-300 flex flex-wrap items-center gap-3"
+        ></div>
+      </div>
+
+      <div class="text-center mb-10">
+        <h1
+          class="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-400 mb-4 tracking-tight"
+        >
+          ChaiCode Cinema - Now Showing<br />
+          <br />
+          <span class="text-red-400">
+            <span class="font-bold">Dhurandhar The Revenge</span>
+          </span>
+        </h1>
+        <p class="text-slate-400 text-lg">Jassi ko ghar ki yaad kyu nhi aai?</p>
+      </div>
+
+      <div class="flex justify-center mb-10">
+        <div
+          class="bg-slate-900/50 rounded-full px-6 py-3 border border-slate-700 flex gap-8 items-center"
+        >
+          <div class="flex items-center gap-3">
+            <div
+              class="w-4 h-4 rounded-full bg-emerald-500 shadow-[0_0_12px_rgba(16,185,129,0.6)]"
+            ></div>
+            <span class="text-slate-300 font-medium tracking-wide"
+              >Available</span
+            >
+          </div>
+          <div class="w-px h-6 bg-slate-700"></div>
+          <div class="flex items-center gap-3">
+            <div
+              class="w-4 h-4 rounded-full bg-rose-500/20 border border-rose-500/50"
+            ></div>
+            <span class="text-slate-400 font-medium tracking-wide">Booked</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex justify-center">
+        <div
+          class="bg-slate-900/40 p-8 rounded-2xl border border-slate-700/50 shadow-inner"
+        >
+          <table
+            id="tbl"
+            class="border-separate border-spacing-4 mx-auto"
+          ></table>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let loggedInUser = null;
+
+      function getBookedSeatHTML(seatId, name, isOwnBookedSeat = false) {
+        const badgeText = isOwnBookedSeat ? "Your booking" : "Booked";
+        const helperText = isOwnBookedSeat
+          ? "Click to remove booking"
+          : "Booked by";
+        return `
+          <div class="relative z-10 flex h-full w-full flex-col items-center justify-center gap-2 px-2 text-center">
+            <span class="text-3xl leading-none">${seatId}</span>
+            <span class="rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] ${
+              isOwnBookedSeat
+                ? "bg-amber-400/20 text-amber-100 border border-amber-300/30"
+                : "bg-rose-400/20 text-rose-100 border border-rose-300/30"
+            }">
+              ${badgeText}
+            </span>
+          </div>
+          <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 px-4 py-2 bg-slate-900 border border-slate-700 text-sm text-slate-300 rounded-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 whitespace-nowrap shadow-2xl z-50 pointer-events-none font-normal shadow-[0_10px_25px_rgba(0,0,0,0.5)]">
+              ${helperText}: <span class="font-bold text-white ml-1">${name}</span>
+              <div class="absolute top-full left-1/2 -translate-x-1/2 -mt-[1px] border-[6px] border-transparent border-t-slate-700"></div>
+              <div class="absolute top-full left-1/2 -translate-x-1/2 -mt-[2px] border-[5px] border-transparent border-t-slate-900"></div>
+          </div>
+        `;
+      }
+
+      function renderAuthBox() {
+        const authBox = document.getElementById("authBox");
+        if (!loggedInUser) {
+          authBox.innerHTML = `
+            <span class="text-slate-400">Login required for booking</span>
+            <a href="/login.html" class="px-4 py-2 rounded-lg bg-cyan-500 text-slate-900 font-semibold hover:bg-cyan-400 transition">Login</a>
+            <a href="/register.html" class="px-4 py-2 rounded-lg border border-emerald-400 text-emerald-300 font-semibold hover:bg-emerald-500/20 transition">Register</a>
+          `;
+          return;
+        }
+
+        authBox.innerHTML = `
+          <span class="px-3 py-2 rounded-lg bg-emerald-500/10 border border-emerald-400/30 text-emerald-300">Welcome, ${loggedInUser.name}</span>
+          <button id="logoutBtn" class="px-4 py-2 rounded-lg bg-rose-500 text-white font-semibold hover:bg-rose-400 transition">Logout</button>
+        `;
+
+        document
+          .getElementById("logoutBtn")
+          .addEventListener("click", logoutUser);
+      }
+
+      async function logoutUser() {
+        try {
+          const res = await fetch("/auth/logout", {
+            method: "POST",
+          });
+
+          if (!res.ok) {
+            alert("Logout failed");
+            return;
+          }
+
+          loggedInUser = null;
+          renderAuthBox();
+          window.location.href = "/login.html";
+        } catch {
+          alert("Logout failed");
+        }
+      }
+
+      async function loadCurrentUser() {
+        try {
+          const res = await fetch("/auth/me");
+          const payload = await res.json();
+          if (!res.ok || !payload.success) {
+            loggedInUser = null;
+            return;
+          }
+          loggedInUser = payload.data;
+        } catch {
+          loggedInUser = null;
+        }
+      }
+
+      async function run() {
+        const tbl = document.getElementById("tbl");
+
+        await loadCurrentUser();
+        renderAuthBox();
+
+        const res = await fetch("/seats");
+        const payload = await res.json();
+        const seats = (payload.data || []).sort((a, b) => a.id - b.id);
+        let tr;
+        for (let i = 0; i < seats.length; i++) {
+          if (i % 8 === 0) tr = document.createElement("tr");
+
+          const td = document.createElement("td");
+
+          const baseClasses =
+            "w-32 h-32 rounded-2xl text-center align-middle text-2xl font-bold transition-all duration-300 select-none relative group";
+
+          const isOwnBookedSeat =
+            loggedInUser &&
+            seats[i].user_id &&
+            String(seats[i].user_id) === String(loggedInUser.id);
+
+          if (seats[i].isbooked) {
+            td.className = isOwnBookedSeat
+              ? `${baseClasses} bg-amber-500/15 text-amber-200 border border-amber-400/40 cursor-pointer hover:bg-amber-500/25`
+              : `${baseClasses} bg-rose-500/10 text-rose-500/60 border border-rose-500/20 cursor-not-allowed`;
+            td.innerHTML = getBookedSeatHTML(
+              seats[i].id,
+              seats[i].name,
+              isOwnBookedSeat,
+            );
+          } else {
+            td.className = `${baseClasses} bg-emerald-500 text-white border-2 border-emerald-400 shadow-[0_0_20px_rgba(16,185,129,0.3)] cursor-pointer hover:bg-emerald-400 hover:-translate-y-1.5 hover:shadow-[0_10px_25px_rgba(16,185,129,0.5)] active:scale-95 active:shadow-[0_0_10px_rgba(16,185,129,0.3)]`;
+            td.innerHTML = `<span class="relative z-10">${seats[i].id}</span>`;
+          }
+
+          td.addEventListener("click", async function (e) {
+            const currentTd = e.currentTarget;
+
+            if (!loggedInUser) {
+              alert("Please login first to book a seat.");
+              window.location.href = "/login.html";
+              return;
+            }
+
+            try {
+              const id = seats[i].id;
+
+              if (seats[i].isbooked) {
+                const isOwner =
+                  seats[i].user_id &&
+                  String(seats[i].user_id) === String(loggedInUser.id);
+
+                if (!isOwner) {
+                  alert(
+                    "Only the user who booked this seat can remove booking.",
+                  );
+                  return;
+                }
+
+                const shouldRemove = confirm(
+                  "Remove your booking for this seat?",
+                );
+                if (!shouldRemove) {
+                  return;
+                }
+
+                const removeRes = await fetch(`/seats/${id}/book`, {
+                  method: "DELETE",
+                });
+                const removePayload = await removeRes.json();
+
+                if (!removeRes.ok || !removePayload.success) {
+                  alert(removePayload.message || "Failed to remove booking");
+                  return;
+                }
+
+                alert("Booking removed successfully!");
+                seats[i] = removePayload.data;
+                currentTd.className = `${baseClasses} bg-emerald-500 text-white border-2 border-emerald-400 shadow-[0_0_20px_rgba(16,185,129,0.3)] cursor-pointer hover:bg-emerald-400 hover:-translate-y-1.5 hover:shadow-[0_10px_25px_rgba(16,185,129,0.5)] active:scale-95 active:shadow-[0_0_10px_rgba(16,185,129,0.3)]`;
+                currentTd.innerHTML = `<span class="relative z-10">${id}</span>`;
+              } else {
+                const res = await fetch(`/seats/${id}/book`, { method: "PUT" });
+                const payload = await res.json();
+
+                if (!res.ok || !payload.success) {
+                  alert(payload.message || "Booking failed");
+                  return;
+                }
+
+                alert("Booked successfully!");
+                seats[i] = payload.data;
+                currentTd.className = `${baseClasses} bg-amber-500/15 text-amber-200 border border-amber-400/40 cursor-pointer hover:bg-amber-500/25`;
+                currentTd.innerHTML = getBookedSeatHTML(
+                  id,
+                  payload.data.name,
+                  true,
+                );
+              }
+            } catch (ex) {
+              alert("error booking " + ex);
+            }
+          });
+          tr.appendChild(td);
+          tbl.appendChild(tr);
+        }
+      }
+      run();
+    </script>
+  </body>
+</html>

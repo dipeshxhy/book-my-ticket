@@ -1,11 +1,11 @@
 import { z } from "zod";
 
 const registerUserSchema = z.object({
-  name: z
+  first_name: z
     .string()
-    .min(3, "Name must be at least 3 characters")
-    .nonempty("Name is required"),
-
+    .min(3, "First name must be at least 3 characters")
+    .nonempty("First name is required"),
+  last_name: z.string().optional(),
   email: z
     .string() // ✅ REQUIRED
     .nonempty("Email is required") // ✅ REQUIRED
